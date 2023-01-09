@@ -38,13 +38,15 @@ public class Login {
                 printWriter.println(username + ":" + password);
                 printWriter.flush();
                 if (scanner.nextLine().equals("GRANTED")) {
-                    Client.username = username;
-                    Client.socket = socket;
+                    Client client = new Client();
+                    client.username = username;
+                    client.socket = socket;
+                    client.label.setText("Welcome, " + username);
                     Main.jFrame.setVisible(false);
                     Main.jFrame = new JFrame("Client");
                     Main.jFrame.setPreferredSize(new Dimension(800, 600));
                     Main.jFrame.setSize(new Dimension(800, 600));
-                    Main.jFrame.setContentPane((new Client()).panel1);
+                    Main.jFrame.setContentPane(client.panel1);
                     Main.jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     Main.jFrame.setLocationRelativeTo(null);
                     Main.jFrame.pack();

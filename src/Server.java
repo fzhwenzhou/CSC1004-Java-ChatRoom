@@ -9,18 +9,40 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 class ThreadServer extends Thread {
+    Socket socket;
+    String username;
+    HashMap<Socket, String> users;
     ThreadServer(Socket socket, String username, HashMap<Socket, String> users) {
-
+        this.socket = socket;
+        this.username = username;
+        this.users = users;
     }
     @Override
     public void run() {
-
+        try {
+            PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+            Scanner scanner = new Scanner(socket.getInputStream());
+            while (scanner.hasNextLine()) {
+                String command = scanner.nextLine();
+                if (command.equals("LOGOUT")) {
+                    users.remove(socket);
+                    socket.close();
+                    return;
+                }
+            }
+        }
+        catch (Exception e) {
+            // Nothing to handle here.
+        }
     }
 
 }
 public class Server {
     private static boolean userPassInDatabase(String username, String password) {
         // Query from DB
+        if (username.equals("naonao")) { // For test only
+            return true;
+        }
         return false;
     }
     private JTextArea textArea1;
@@ -43,16 +65,21 @@ public class Server {
                             Socket socket = serverSocket.accept();
                             Scanner scanner = new Scanner(socket.getInputStream());
                             PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
-                            String[] loginMessage = scanner.nextLine().split(":");
-                            if (userPassInDatabase(loginMessage[0], loginMessage[1])) {
-                                users.put(socket, loginMessage[0]);
-                                (new ThreadServer(socket, loginMessage[0], users)).start();
-                                printWriter.println("GRANTED");
-                                printWriter.flush();
+                            String message = scanner.nextLine();
+                            if (message.equals("REGISTER")) {
+                                // Go to register
                             }
                             else {
-                                printWriter.println("DENIED");
-                                printWriter.flush();
+                                String[] loginMessage = message.split(":");
+                                if (userPassInDatabase(loginMessage[0], loginMessage[1])) {
+                                    users.put(socket, loginMessage[0]);
+                                    (new ThreadServer(socket, loginMessage[0], users)).start();
+                                    printWriter.println("GRANTED");
+                                    printWriter.flush();
+                                } else {
+                                    printWriter.println("DENIED");
+                                    printWriter.flush();
+                                }
                             }
                         }
                     }
