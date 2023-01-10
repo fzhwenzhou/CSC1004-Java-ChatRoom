@@ -38,10 +38,7 @@ public class Login {
                 printWriter.println(username + ":" + password);
                 printWriter.flush();
                 if (scanner.nextLine().equals("GRANTED")) {
-                    Client client = new Client();
-                    client.username = username;
-                    client.socket = socket;
-                    client.label.setText("Welcome, " + username);
+                    Client client = new Client(username, socket);
                     Main.jFrame.setVisible(false);
                     Main.jFrame = new JFrame("Client");
                     Main.jFrame.setPreferredSize(new Dimension(800, 600));

@@ -24,10 +24,27 @@ class ThreadServer extends Thread {
             Scanner scanner = new Scanner(socket.getInputStream());
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine();
-                if (command.equals("LOGOUT")) {
-                    users.remove(socket);
-                    socket.close();
-                    return;
+                switch (command) {
+                    case "LOGOUT" -> {
+                        users.remove(socket);
+                        socket.close();
+                        return;
+                    }
+                    case "MESSAGE" -> {
+                        String message = scanner.nextLine();
+                        users.forEach((user, username) -> {
+                            try {
+                                PrintWriter printEach = new PrintWriter(user.getOutputStream());
+                                printEach.println("MESSAGE");
+                                printEach.println(this.username);
+                                printEach.println(message);
+                                printEach.flush();
+                            }
+                            catch (Exception exception) {
+                                // Nothing to handle here.
+                            }
+                        });
+                    }
                 }
             }
         }
@@ -40,7 +57,7 @@ class ThreadServer extends Thread {
 public class Server {
     private static boolean userPassInDatabase(String username, String password) {
         // Query from DB
-        if (username.equals("naonao")) { // For test only
+        if (username.equals("naonao") || username.equals("fzh2003")) { // For test only
             return true;
         }
         return false;
