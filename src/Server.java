@@ -1,6 +1,7 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -22,26 +23,42 @@ class ThreadServer extends Thread {
         try {
             PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
             Scanner scanner = new Scanner(socket.getInputStream());
+            users.forEach((user, username) -> {
+                printWriter.println("ADDUSER");
+                printWriter.println(username);
+                printWriter.flush();
+            });
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine();
                 switch (command) {
                     case "LOGOUT" -> {
                         users.remove(socket);
                         socket.close();
+                        users.forEach((user, username) -> {
+                            try {
+                                PrintWriter printEach = new PrintWriter(user.getOutputStream());
+                                printEach.println("DELUSER");
+                                printEach.println(this.username);
+                                printEach.flush();
+                            }
+                            catch (Exception exception) {
+                                exception.printStackTrace();
+                            }
+                        });
                         return;
                     }
-                    case "MESSAGE" -> {
+                    case "MESSAGE", "IMAGE" -> {
                         String message = scanner.nextLine();
                         users.forEach((user, username) -> {
                             try {
                                 PrintWriter printEach = new PrintWriter(user.getOutputStream());
-                                printEach.println("MESSAGE");
+                                printEach.println(command);
                                 printEach.println(this.username);
                                 printEach.println(message);
                                 printEach.flush();
                             }
                             catch (Exception exception) {
-                                // Nothing to handle here.
+                                exception.printStackTrace();
                             }
                         });
                     }
@@ -49,21 +66,60 @@ class ThreadServer extends Thread {
             }
         }
         catch (Exception e) {
-            // Nothing to handle here.
+            try {
+                users.remove(socket);
+                socket.close();
+                users.forEach((user, username) -> {
+                    try {
+                        PrintWriter printEach = new PrintWriter(user.getOutputStream());
+                        printEach.println("DELUSER");
+                        printEach.println(this.username);
+                        printEach.flush();
+                    }
+                    catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                });
+                return;
+            }
+            catch (Exception exception) {
+                exception.printStackTrace();
+            }
+            e.printStackTrace();
         }
     }
 
 }
 public class Server {
-    private static boolean userPassInDatabase(String username, String password) {
-        // Query from DB
-        if (username.equals("naonao") || username.equals("fzh2003")) { // For test only
-            return true;
+    private static boolean register(String username, int age, String gender, String address, String password) {
+        try {
+            SQLiteDatabase database = new SQLiteDatabase((new File("")).getCanonicalPath() + "/sqlite.db");
+            if (!database.tableExists()) {
+                database.createTable();
+            }
+            return database.registerQuery(username, age, gender, address, password);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }
-    private JTextArea textArea1;
-    private JTextArea textArea2;
+    private static boolean userPassInDatabase(String username, String password) {
+        try {
+            SQLiteDatabase database = new SQLiteDatabase((new File("")).getCanonicalPath() + "/sqlite.db");
+            // Query from DB
+            if (!database.tableExists()) {
+                return false;
+            }
+            return database.loginQuery(username, password);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    private JTextField textField1;
+    private JTextField textField2;
     private JButton startServerButton;
     public JPanel panel1;
 
@@ -72,8 +128,8 @@ public class Server {
         @Override
         public void actionPerformed(ActionEvent e) {
             if (startServerButton.getText().equals("Start Server")) {
-                String address = textArea1.getText();
-                String port = textArea2.getText();
+                String address = textField1.getText();
+                String port = textField2.getText();
                 (new Thread(() -> {
                     try {
                         HashMap<Socket, String> users = new HashMap<Socket, String>();
@@ -84,11 +140,35 @@ public class Server {
                             PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                             String message = scanner.nextLine();
                             if (message.equals("REGISTER")) {
+                                if (register(scanner.nextLine(), Integer.parseInt(scanner.nextLine()), scanner.nextLine(), scanner.nextLine(), scanner.nextLine())) {
+                                    printWriter.println("SUCCESS");
+                                    printWriter.flush();
+                                }
+                                else {
+                                    printWriter.println("FAILED");
+                                    printWriter.flush();
+                                }
                                 // Go to register
                             }
                             else {
                                 String[] loginMessage = message.split(":");
                                 if (userPassInDatabase(loginMessage[0], loginMessage[1])) {
+                                    if (users.containsValue(loginMessage[0])) {
+                                        printWriter.println("LOGGEDIN");
+                                        printWriter.flush();
+                                        continue;
+                                    }
+                                    users.forEach((user, username) -> {
+                                        try {
+                                            PrintWriter printEach = new PrintWriter(user.getOutputStream());
+                                            printEach.println("ADDUSER");
+                                            printEach.println(loginMessage[0]);
+                                            printEach.flush();
+                                        }
+                                        catch (Exception exception) {
+                                            exception.printStackTrace();
+                                        }
+                                    });
                                     users.put(socket, loginMessage[0]);
                                     (new ThreadServer(socket, loginMessage[0], users)).start();
                                     printWriter.println("GRANTED");

@@ -40,9 +40,18 @@
           <text value="Server Port"/>
         </properties>
       </component>
-      <component id="24d05" class="javax.swing.JTextArea" binding="textArea1">
+      <component id="f339c" class="javax.swing.JButton" binding="startServerButton" default-binding="true">
         <constraints>
-          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+          <grid row="3" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font size="24"/>
+          <text value="Start Server"/>
+        </properties>
+      </component>
+      <component id="9da5c" class="javax.swing.JTextField" binding="textField1" default-binding="true">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="50"/>
           </grid>
         </constraints>
@@ -51,24 +60,15 @@
           <text value="127.0.0.1"/>
         </properties>
       </component>
-      <component id="d0ee2" class="javax.swing.JTextArea" binding="textArea2">
+      <component id="ad952" class="javax.swing.JTextField" binding="textField2" default-binding="true">
         <constraints>
-          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false">
+          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
             <preferred-size width="150" height="50"/>
           </grid>
         </constraints>
         <properties>
           <font size="24"/>
           <text value="32768"/>
-        </properties>
-      </component>
-      <component id="f339c" class="javax.swing.JButton" binding="startServerButton" default-binding="true">
-        <constraints>
-          <grid row="3" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <font size="24"/>
-          <text value="Start Server"/>
         </properties>
       </component>
     </children>

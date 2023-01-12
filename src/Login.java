@@ -12,21 +12,22 @@ import java.util.Scanner;
 public class Login {
     private JButton button1;
     public JPanel panel1;
-    private JTextArea textArea1;
-    private JTextArea textArea2;
-    private JTextArea textArea3;
+    private JTextField textField1;
+    private JTextField textField2;
+    private JTextField textField3;
     private JPasswordField passwordField1;
+    private JButton registerButton;
 
     public Login() {
     button1.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            String address = textArea1.getText();
-            String port = textArea2.getText();
-            String username = textArea3.getText();
+            String address = textField1.getText();
+            String port = textField2.getText();
+            String username = textField3.getText();
             String password = "";
             try {
-                password = new BigInteger(1, MessageDigest.getInstance("md5").digest(passwordField1.getText().getBytes())).toString(16);
+                password = (new BigInteger(1, MessageDigest.getInstance("md5").digest(passwordField1.getText().getBytes()))).toString(16);
             }
             catch (NoSuchAlgorithmException exception) {
                 // Actually nothing to handle here.
@@ -37,17 +38,24 @@ public class Login {
                 PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                 printWriter.println(username + ":" + password);
                 printWriter.flush();
-                if (scanner.nextLine().equals("GRANTED")) {
+                String message = scanner.nextLine();
+                if (message.equals("GRANTED")) {
                     Client client = new Client(username, socket);
                     Main.jFrame.setVisible(false);
                     Main.jFrame = new JFrame("Client");
-                    Main.jFrame.setPreferredSize(new Dimension(800, 600));
-                    Main.jFrame.setSize(new Dimension(800, 600));
+                    Main.jFrame.setPreferredSize(new Dimension(500, 600));
+                    Main.jFrame.setSize(new Dimension(500, 600));
                     Main.jFrame.setContentPane(client.panel1);
                     Main.jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     Main.jFrame.setLocationRelativeTo(null);
                     Main.jFrame.pack();
                     Main.jFrame.setVisible(true);
+                }
+                else if (message.equals("LOGGEDIN")) {
+                    JOptionPane.showMessageDialog(null,
+                            "Login failed. User already logged in.",
+                            "Login Failed",
+                            JOptionPane.ERROR_MESSAGE);
                 }
                 else {
                     JOptionPane.showMessageDialog(null,
@@ -64,5 +72,19 @@ public class Login {
             }
         }
     });
-}
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Main.jFrame.setVisible(false);
+                Main.jFrame = new JFrame("Register");
+                Main.jFrame.setPreferredSize(new Dimension(800, 600));
+                Main.jFrame.setSize(new Dimension(800, 600));
+                Main.jFrame.setContentPane((new Register()).panel1);
+                Main.jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                Main.jFrame.setLocationRelativeTo(null);
+                Main.jFrame.pack();
+                Main.jFrame.setVisible(true);
+            }
+        });
+    }
 }
