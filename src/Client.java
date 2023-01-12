@@ -47,7 +47,10 @@ class ThreadClient extends Thread {
                         String user = scanner.nextLine();
                         String imageBase64 = scanner.nextLine();
                         byte[] bytes = Base64.getDecoder().decode(imageBase64);
-                        JLabel imageLabel = new JLabel(new ImageIcon(bytes));
+                        ImageIcon image = new ImageIcon(bytes);
+                        int height = (int)(200.0 / (double)image.getIconWidth() * (double)image.getIconHeight());
+                        image.setImage(image.getImage().getScaledInstance(200, height, Image.SCALE_DEFAULT));
+                        JLabel imageLabel = new JLabel(image);
                         JLabel userLabel = new JLabel("User: " + user);
                         userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
                         userLabel.setForeground(Color.RED);
@@ -69,6 +72,15 @@ class ThreadClient extends Thread {
             }
         }
         catch (Exception e) {
+            try {
+                PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+                printWriter.println("LOGOUT");
+                printWriter.flush();
+                socket.close();
+            }
+            catch (Exception exception) {
+                exception.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
@@ -158,6 +170,7 @@ public class Client {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser jFileChooser = new JFileChooser();
+                jFileChooser.removeChoosableFileFilter(jFileChooser.getAcceptAllFileFilter());
                 jFileChooser.addChoosableFileFilter(new FileFilter() {
                     String[] extensions = {"jpg", "png", "jpeg", "gif"};
                     @Override
@@ -183,16 +196,17 @@ public class Client {
                 });
                 jFileChooser.showDialog(new JLabel(), "Choose");
                 File file = jFileChooser.getSelectedFile();
-                try {
-                    byte[] bytes = Files.readAllBytes(file.toPath());
-                    String imageBase64 = Base64.getEncoder().encodeToString(bytes);
-                    PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
-                    printWriter.println("IMAGE");
-                    printWriter.println(imageBase64);
-                    printWriter.flush();
-                }
-                catch (Exception exception) {
-                    exception.printStackTrace();
+                if (file != null) {
+                    try {
+                        byte[] bytes = Files.readAllBytes(file.toPath());
+                        String imageBase64 = Base64.getEncoder().encodeToString(bytes);
+                        PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+                        printWriter.println("IMAGE");
+                        printWriter.println(imageBase64);
+                        printWriter.flush();
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
                 }
             }
         });
