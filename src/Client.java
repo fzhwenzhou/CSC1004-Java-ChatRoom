@@ -1,10 +1,7 @@
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -48,9 +45,48 @@ class ThreadClient extends Thread {
                         String imageBase64 = scanner.nextLine();
                         byte[] bytes = Base64.getDecoder().decode(imageBase64);
                         ImageIcon image = new ImageIcon(bytes);
-                        int height = (int)(200.0 / (double)image.getIconWidth() * (double)image.getIconHeight());
-                        image.setImage(image.getImage().getScaledInstance(200, height, Image.SCALE_DEFAULT));
+                        int width = image.getIconWidth();
+                        int height = image.getIconHeight();
+                        if (200.0 / (double)width * (double)height > 150) {
+                            height = (int)(200.0 / (double)width * (double)height);
+                            width = 200;
+                        }
+                        else {
+                            width = (int)(150.0 / (double)height * (double)height);
+                            height = 150;
+                        }
+                        image.setImage(image.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
                         JLabel imageLabel = new JLabel(image);
+                        imageLabel.addMouseListener(new MouseListener() {
+                            @Override
+                            public void mouseClicked(MouseEvent e) {
+                                JFrame jFrame = new JFrame("Image Viewer");
+                                JPanel jPanel = new JPanel();
+                                jPanel.setPreferredSize(new Dimension(750, 550));
+                                JScrollPane jScrollPane = new JScrollPane();
+                                jScrollPane.setPreferredSize(new Dimension(750, 550));
+                                jPanel.add(jScrollPane);
+                                jScrollPane.getViewport().add(new JLabel(new ImageIcon(bytes)));
+                                jFrame.setPreferredSize(new Dimension(800, 600));
+                                jFrame.setSize(new Dimension(800, 600));
+                                jFrame.setContentPane(jPanel);
+                                jFrame.setLocationRelativeTo(null);
+                                jFrame.pack();
+                                jFrame.setVisible(true);
+                            }
+
+                            @Override
+                            public void mousePressed(MouseEvent e) {}
+
+                            @Override
+                            public void mouseReleased(MouseEvent e) {}
+
+                            @Override
+                            public void mouseEntered(MouseEvent e) {}
+
+                            @Override
+                            public void mouseExited(MouseEvent e) {}
+                        });
                         JLabel userLabel = new JLabel("User: " + user);
                         userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
                         userLabel.setForeground(Color.RED);
