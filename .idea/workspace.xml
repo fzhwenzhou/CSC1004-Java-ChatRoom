@@ -10,11 +10,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2bfc0d14-9ebd-4fe4-b116-1f614d0fe4a0" name="变更" comment="">
-      <change afterPath="$PROJECT_DIR$/sqlite.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client.form" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.form" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Login.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Register.form" beforeDir="false" afterPath="$PROJECT_DIR$/src/Register.form" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Register.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Register.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -100,7 +100,8 @@
       <workItem from="1673483859859" duration="13183000" />
       <workItem from="1673518887756" duration="6967000" />
       <workItem from="1673579610772" duration="4084000" />
-      <workItem from="1673583793799" duration="3439000" />
+      <workItem from="1673583793799" duration="3492000" />
+      <workItem from="1673590879348" duration="2047000" />
     </task>
     <servers />
   </component>

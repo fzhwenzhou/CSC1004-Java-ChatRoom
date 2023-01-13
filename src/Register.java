@@ -16,9 +16,9 @@ public class Register {
     private JPasswordField passwordField1;
     public JPanel panel1;
     private JTextField ageTextField;
-    private JTextField genderTextField;
     private JTextField addressTextField1;
     private JPasswordField passwordField2;
+    private JComboBox<String> genderComboBox;
 
     public Register() {
     button1.addActionListener(new ActionListener() {
@@ -28,7 +28,7 @@ public class Register {
             String port = portTextField.getText();
             String username = usernameTextField.getText();
             String age = ageTextField.getText();
-            String gender = genderTextField.getText();
+            String gender = genderComboBox.getSelectedItem().toString();
             String address1 = addressTextField1.getText();
             String password1 = "", password2 = "";
             try {
@@ -41,6 +41,9 @@ public class Register {
             int ageNumber, portNumber;
             try {
                 ageNumber = Integer.parseInt(age);
+                if (ageNumber < 0) {
+                    throw new Exception();
+                }
                 portNumber = Integer.parseInt(port);
             }
             catch (Exception exception) {

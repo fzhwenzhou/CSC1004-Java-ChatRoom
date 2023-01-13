@@ -196,6 +196,22 @@ public class Client {
         this.scrollPane1.getViewport().add(this.list1);
         this.scrollPane2.getViewport().add(this.chatPanel);
         (new ThreadClient(username, socket, this)).start();
+        Main.jFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                super.windowClosing(e);
+                try {
+                    PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+                    printWriter.println("LOGOUT");
+                    printWriter.flush();
+                    socket.close();
+                }
+                catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+                System.exit(0);
+            }
+        });
     logoutButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -222,6 +238,9 @@ public class Client {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (textField1.getText().equals("")) {
+                    return;
+                }
                 try {
                     PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                     printWriter.println("MESSAGE");
@@ -239,6 +258,9 @@ public class Client {
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    if (textField1.getText().equals("")) {
+                        return;
+                    }
                     try {
                         PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                         printWriter.println("MESSAGE");
