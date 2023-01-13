@@ -8,7 +8,48 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Scanner;
-
+class SocketAliveThread extends Thread {
+    Socket socket;
+    HashMap<Socket, String> users;
+    String username;
+    ThreadServer threadServer;
+    SocketAliveThread(Socket socket, HashMap<Socket, String> users, String username, ThreadServer threadServer) {
+        this.socket = socket;
+        this.users = users;
+        this.username = username;
+        this.threadServer = threadServer;
+    }
+    @Override
+    public void run() {
+        try {
+            while (true) {
+                socket.sendUrgentData(0xFF);
+                Thread.sleep(10000);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            try {
+                users.remove(socket);
+                socket.close();
+                threadServer.stop();
+                users.forEach((user, username) -> {
+                    try {
+                        PrintWriter printEach = new PrintWriter(user.getOutputStream());
+                        printEach.println("DELUSER");
+                        printEach.println(this.username);
+                        printEach.flush();
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                });
+            }
+            catch (Exception exception) {
+                exception.printStackTrace();
+            }
+        }
+    }
+}
 class ThreadServer extends Thread {
     Socket socket;
     String username;
@@ -47,7 +88,7 @@ class ThreadServer extends Thread {
                         });
                         return;
                     }
-                    case "MESSAGE", "IMAGE" -> {
+                    case "MESSAGE", "IMAGE", "AUDIO" -> {
                         String message = scanner.nextLine();
                         users.forEach((user, username) -> {
                             try {
@@ -56,6 +97,7 @@ class ThreadServer extends Thread {
                                 printEach.println(this.username);
                                 printEach.println(message);
                                 printEach.flush();
+                                // Add to database
                             }
                             catch (Exception exception) {
                                 exception.printStackTrace();
@@ -170,7 +212,9 @@ public class Server {
                                         }
                                     });
                                     users.put(socket, loginMessage[0]);
-                                    (new ThreadServer(socket, loginMessage[0], users)).start();
+                                    ThreadServer threadServer = new ThreadServer(socket, loginMessage[0], users);
+                                    threadServer.start();
+                                    (new SocketAliveThread(socket, users, loginMessage[0], threadServer)).start();
                                     printWriter.println("GRANTED");
                                     printWriter.flush();
                                 } else {

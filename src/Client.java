@@ -1,8 +1,14 @@
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -39,6 +45,9 @@ class ThreadClient extends Thread {
                         client.chatPanel.add(userLabel);
                         client.chatPanel.add(messageLabel);
                         client.chatPanel.revalidate();
+
+                        // Add to database
+
                     }
                     case "IMAGE" -> {
                         String user = scanner.nextLine();
@@ -94,6 +103,46 @@ class ThreadClient extends Thread {
                         client.chatPanel.add(imageLabel);
                         client.chatPanel.revalidate();
                     }
+                    case "AUDIO" -> {
+                        String user = scanner.nextLine();
+                        String audioBase64 = scanner.nextLine();
+                        byte[] bytes = Base64.getDecoder().decode(audioBase64);
+                        JLabel userLabel = new JLabel("User: " + user);
+                        userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
+                        userLabel.setForeground(Color.RED);
+                        JButton soundButton = new JButton("Play Sound");
+                        soundButton.setFont(new Font("Dialog", Font.PLAIN, 20));
+                        Clip audioClip = AudioSystem.getClip();
+                        soundButton.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                try {
+                                    if (soundButton.getText().equals("Play Sound")) {
+                                        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+                                        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
+                                        if (!audioClip.isOpen()) {
+                                            audioClip.open(audioInputStream);
+                                        }
+                                        new Thread(() -> audioClip.start()).start();
+                                        soundButton.setText("Stop Sound");
+                                    }
+                                    else {
+                                        if (audioClip.isRunning()) {
+                                            audioClip.stop();
+                                        }
+                                        audioClip.flush();
+                                        soundButton.setText("Play Sound");
+                                    }
+                                }
+                                catch (Exception exception) {
+                                    exception.printStackTrace();
+                                }
+                            }
+                        });
+                        client.chatPanel.add(userLabel);
+                        client.chatPanel.add(soundButton);
+                        client.chatPanel.revalidate();
+                    }
                     case "ADDUSER" -> {
                         String user = scanner.nextLine();
                         client.defaultListModel.addElement(user);
@@ -134,6 +183,7 @@ public class Client {
     private JScrollPane scrollPane1;
     public JList list1;
     private JButton imageButton;
+    private JButton audioButton;
     public JPanel chatPanel = new JPanel();
 
     public Client(String username, Socket socket) {
@@ -239,6 +289,50 @@ public class Client {
                         PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                         printWriter.println("IMAGE");
                         printWriter.println(imageBase64);
+                        printWriter.flush();
+                    } catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                }
+            }
+        });
+        audioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser jFileChooser = new JFileChooser();
+                jFileChooser.removeChoosableFileFilter(jFileChooser.getAcceptAllFileFilter());
+                jFileChooser.addChoosableFileFilter(new FileFilter() {
+                    String[] extensions = {"wav", "aifc", "aiff", "au", "snd"};
+                    @Override
+                    public boolean accept(File f) {
+                        if (f.isDirectory()) {
+                            return true;
+                        }
+                        String filename = f.getName();
+                        int dot = filename.lastIndexOf(".");
+                        if (dot > 0 && dot < filename.length() - 1) {
+                            String extension = filename.substring(dot + 1).toLowerCase();
+                            if (Arrays.asList(extensions).contains(extension)) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public String getDescription() {
+                        return "Audio File (*.wav, *.aifc, *.aiff, *.au, *.snd)";
+                    }
+                });
+                jFileChooser.showDialog(new JLabel(), "Choose");
+                File file = jFileChooser.getSelectedFile();
+                if (file != null) {
+                    try {
+                        byte[] bytes = Files.readAllBytes(file.toPath());
+                        String audioBase64 = Base64.getEncoder().encodeToString(bytes);
+                        PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+                        printWriter.println("AUDIO");
+                        printWriter.println(audioBase64);
                         printWriter.flush();
                     } catch (Exception exception) {
                         exception.printStackTrace();

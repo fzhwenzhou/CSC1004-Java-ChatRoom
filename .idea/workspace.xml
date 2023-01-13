@@ -10,8 +10,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2bfc0d14-9ebd-4fe4-b116-1f614d0fe4a0" name="变更" comment="">
+      <change afterPath="$PROJECT_DIR$/sqlite.db" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Client.form" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.form" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Login.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +98,9 @@
       <workItem from="1673438780530" duration="9736000" />
       <workItem from="1673450023591" duration="1731000" />
       <workItem from="1673483859859" duration="13183000" />
-      <workItem from="1673518887756" duration="1654000" />
+      <workItem from="1673518887756" duration="6967000" />
+      <workItem from="1673579610772" duration="4084000" />
+      <workItem from="1673583793799" duration="3439000" />
     </task>
     <servers />
   </component>
@@ -108,14 +114,9 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/Server.java</url>
-          <line>141</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/Client.java</url>
-          <line>46</line>
-          <option name="timeStamp" value="5" />
+          <line>119</line>
+          <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
