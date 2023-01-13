@@ -42,6 +42,7 @@ public class Login {
                 if (message.equals("GRANTED")) {
                     Client client = new Client(username, socket);
                     Main.jFrame.setVisible(false);
+                    Main.jFrame = new JFrame("Client");
                     Main.jFrame.setPreferredSize(new Dimension(550, 600));
                     Main.jFrame.setSize(new Dimension(550, 600));
                     Main.jFrame.setContentPane(client.panel1);
