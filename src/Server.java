@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -28,6 +29,7 @@ class ThreadServer extends Thread {
                 printWriter.println(username);
                 printWriter.flush();
             });
+            Date date = new Date();
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine();
                 switch (command) {
@@ -54,6 +56,7 @@ class ThreadServer extends Thread {
                                 PrintWriter printEach = new PrintWriter(user.getOutputStream());
                                 printEach.println(command);
                                 printEach.println(this.username);
+                                printEach.println(date.getTime());
                                 printEach.println(message);
                                 printEach.flush();
                                 // Add to database

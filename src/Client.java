@@ -14,6 +14,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Date;
 import java.util.Scanner;
 
 class ThreadClient extends Thread {
@@ -35,8 +36,9 @@ class ThreadClient extends Thread {
                 switch (command) {
                     case "MESSAGE" -> {
                         String user = scanner.nextLine();
+                        long time = Long.parseLong(scanner.nextLine());
                         String message = scanner.nextLine();
-                        JLabel userLabel = new JLabel("User: " + user);
+                        JLabel userLabel = new JLabel("User: " + user + " Time: " + (new Date(time)).toString());
                         JLabel messageLabel = new JLabel(message);
                         userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
                         userLabel.setForeground(Color.RED);
@@ -51,6 +53,7 @@ class ThreadClient extends Thread {
                     }
                     case "IMAGE" -> {
                         String user = scanner.nextLine();
+                        long time = Long.parseLong(scanner.nextLine());
                         String imageBase64 = scanner.nextLine();
                         byte[] bytes = Base64.getDecoder().decode(imageBase64);
                         ImageIcon image = new ImageIcon(bytes);
@@ -96,7 +99,7 @@ class ThreadClient extends Thread {
                             @Override
                             public void mouseExited(MouseEvent e) {}
                         });
-                        JLabel userLabel = new JLabel("User: " + user);
+                        JLabel userLabel = new JLabel("User: " + user + " Time: " + (new Date(time)).toString());
                         userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
                         userLabel.setForeground(Color.RED);
                         client.chatPanel.add(userLabel);
@@ -105,9 +108,10 @@ class ThreadClient extends Thread {
                     }
                     case "AUDIO" -> {
                         String user = scanner.nextLine();
+                        long time = Long.parseLong(scanner.nextLine());
                         String audioBase64 = scanner.nextLine();
                         byte[] bytes = Base64.getDecoder().decode(audioBase64);
-                        JLabel userLabel = new JLabel("User: " + user);
+                        JLabel userLabel = new JLabel("User: " + user + " Time: " + (new Date(time)).toString());
                         userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
                         userLabel.setForeground(Color.RED);
                         JButton soundButton = new JButton("Play Sound");
