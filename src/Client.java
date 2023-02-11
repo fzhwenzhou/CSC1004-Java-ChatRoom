@@ -1,14 +1,13 @@
-import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -73,16 +72,15 @@ class ThreadClient extends Thread {
                             @Override
                             public void mouseClicked(MouseEvent e) {
                                 JFrame jFrame = new JFrame("Image Viewer");
-                                JPanel jPanel = new JPanel();
-                                jPanel.setPreferredSize(new Dimension(750, 550));
-                                JScrollPane jScrollPane = new JScrollPane();
-                                jScrollPane.setPreferredSize(new Dimension(750, 550));
-                                jPanel.add(jScrollPane);
+                                ImageViewer imageViewer = new ImageViewer();
+                                JPanel jPanel = imageViewer.jPanel;
+                                JScrollPane jScrollPane = imageViewer.jScrollPane;
                                 jScrollPane.getViewport().add(new JLabel(new ImageIcon(bytes)));
                                 jFrame.setPreferredSize(new Dimension(800, 600));
                                 jFrame.setSize(new Dimension(800, 600));
                                 jFrame.setContentPane(jPanel);
                                 jFrame.setLocationRelativeTo(null);
+                                jFrame.setAlwaysOnTop(true);
                                 jFrame.pack();
                                 jFrame.setVisible(true);
                             }
@@ -188,6 +186,7 @@ public class Client {
     public JList list1;
     private JButton imageButton;
     private JButton audioButton;
+    private JButton emojiButton;
     public JPanel chatPanel = new JPanel();
 
     public Client(String username, Socket socket) {
@@ -364,6 +363,42 @@ public class Client {
                         exception.printStackTrace();
                     }
                 }
+            }
+        });
+        emojiButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFrame jFrame = new JFrame("Emoji Selector");
+                DefaultListModel<String> emojiList = new DefaultListModel<String>();
+                for (char i = '\uDE00'; i < '\uDE70'; i++) {
+                    String emoji = "\uD83D" + i;
+                    emojiList.addElement(emoji);
+                }
+                EmojiSelector emojiSelector = new EmojiSelector();
+                emojiSelector.list.setModel(emojiList);
+                jFrame.setContentPane(emojiSelector.jPanel);
+                jFrame.setSize(new Dimension(300, 600));
+                jFrame.setPreferredSize(new Dimension(300, 600));
+                jFrame.setLocationRelativeTo(null);
+                jFrame.setAlwaysOnTop(true);
+                jFrame.pack();
+                jFrame.setVisible(true);
+                (new Thread(() -> {
+                    while (emojiSelector.emoji == -1 && jFrame.isVisible()) {
+                        // Do nothing
+                        try {
+                            Thread.sleep(1);
+                        }
+                        catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                    }
+                    if (emojiSelector.emoji != -1) {
+                        textField1.setText(textField1.getText() + emojiList.getElementAt(EmojiSelector.emoji));
+                    }
+                    emojiSelector.emoji = -1;
+                    jFrame.setVisible(false);
+                })).start();
             }
         });
     }
