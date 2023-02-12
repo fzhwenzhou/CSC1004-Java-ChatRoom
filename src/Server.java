@@ -6,10 +6,43 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Scanner;
-
+class ChatServer extends Thread {
+    Socket socket;
+    ChatServer(Socket socket) {
+        this.socket = socket;
+        Server.chatClients.add(socket);
+    }
+    @Override
+    public void run() {
+        try {
+            PrintWriter audioPrinter = new PrintWriter(socket.getOutputStream());
+            Scanner audioScanner = new Scanner(socket.getInputStream());
+            while (audioScanner.hasNextLine()) {
+                String audioBase64 = audioScanner.nextLine();
+                if (audioBase64.equals("STOP CHATTING")) {
+                    break;
+                }
+                else {
+                    for (Socket userSocket : Server.chatClients) {
+                        if (!userSocket.equals(socket)) {
+                            audioPrinter.println(audioBase64);
+                            audioPrinter.flush();
+                        }
+                    }
+                }
+            }
+            socket.close();
+            Server.chatClients.remove(socket);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
 class ThreadServer extends Thread {
     Socket socket;
     String username;
@@ -65,6 +98,10 @@ class ThreadServer extends Thread {
                             }
                         });
                     }
+                    case "CHAT" -> {
+                        ServerSocket serverSocket = new ServerSocket(65535);
+                        (new ChatServer(serverSocket.accept())).start();
+                    }
                 }
             }
         }
@@ -94,6 +131,7 @@ class ThreadServer extends Thread {
 
 }
 public class Server {
+    public static ArrayList<Socket> chatClients = new ArrayList<Socket>();
     private static boolean register(String username, int age, String gender, String address, String password) {
         try {
             SQLiteDatabase database = new SQLiteDatabase((new File("")).getCanonicalPath() + "/sqlite.db");

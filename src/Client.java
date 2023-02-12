@@ -2,7 +2,6 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
@@ -249,6 +248,7 @@ public class Client {
     private JButton imageButton;
     private JButton audioButton;
     private JButton emojiButton;
+    private JButton voiceChatButton;
     public JPanel chatPanel = new JPanel();
 
     public Client(String username, Socket socket) {
@@ -461,6 +461,39 @@ public class Client {
                     emojiSelector.emoji = -1;
                     jFrame.setVisible(false);
                 })).start();
+            }
+        });
+        voiceChatButton.addActionListener(new ActionListener() {
+            static boolean isChatting = false;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (voiceChatButton.getText().equals("Voice Chat")) {
+                    voiceChatButton.setText("Stop Chat");
+                    isChatting = true;
+                    (new Thread(() -> {
+                        try {
+                            PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+                            printWriter.println("CHAT");
+                            printWriter.flush();
+                            Socket chatSocket = new Socket(socket.getInetAddress(), 65535);
+                            PrintWriter audioPrinter = new PrintWriter(chatSocket.getOutputStream());
+                            Scanner audioScanner = new Scanner(chatSocket.getInputStream());
+                            while (isChatting) {
+
+                            }
+                            audioPrinter.println("STOP CHATTING");
+                            audioPrinter.flush();
+                            chatSocket.close();
+                        }
+                        catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                    })).start();
+                }
+                else {
+                    voiceChatButton.setText("Voice Chat");
+                    isChatting = false;
+                }
             }
         });
     }
