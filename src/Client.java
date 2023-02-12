@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -25,11 +26,145 @@ class ThreadClient extends Thread {
         this.socket = socket;
         this.client = client;
     }
+    private void message(String userText, String message) {
+        JLabel userLabel = new JLabel(userText);
+        JLabel messageLabel = new JLabel(message);
+        userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
+        userLabel.setForeground(Color.RED);
+        messageLabel.setFont(new Font("Dialog", Font.PLAIN, 20));
+        // Add to panel
+        client.chatPanel.add(userLabel);
+        client.chatPanel.add(messageLabel);
+        client.chatPanel.revalidate();
+    }
+    private void image(String userText, String imageBase64) {
+        byte[] bytes = Base64.getDecoder().decode(imageBase64);
+        ImageIcon image = new ImageIcon(bytes);
+        int width = image.getIconWidth();
+        int height = image.getIconHeight();
+        if (200.0 / (double)width * (double)height > 150) {
+            height = (int)(200.0 / (double)width * (double)height);
+            width = 200;
+        }
+        else {
+            width = (int)(150.0 / (double)height * (double)height);
+            height = 150;
+        }
+        image.setImage(image.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
+        JLabel imageLabel = new JLabel(image);
+        imageLabel.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JFrame jFrame = new JFrame("Image Viewer");
+                ImageViewer imageViewer = new ImageViewer();
+                JPanel jPanel = imageViewer.jPanel;
+                JScrollPane jScrollPane = imageViewer.jScrollPane;
+                jScrollPane.getViewport().add(new JLabel(new ImageIcon(bytes)));
+                jFrame.setPreferredSize(new Dimension(800, 600));
+                jFrame.setSize(new Dimension(800, 600));
+                jFrame.setContentPane(jPanel);
+                jFrame.setLocationRelativeTo(null);
+                jFrame.setAlwaysOnTop(true);
+                jFrame.pack();
+                jFrame.setVisible(true);
+            }
 
+            @Override
+            public void mousePressed(MouseEvent e) {}
+
+            @Override
+            public void mouseReleased(MouseEvent e) {}
+
+            @Override
+            public void mouseEntered(MouseEvent e) {}
+
+            @Override
+            public void mouseExited(MouseEvent e) {}
+        });
+        JLabel userLabel = new JLabel(userText);
+        userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
+        userLabel.setForeground(Color.RED);
+        client.chatPanel.add(userLabel);
+        client.chatPanel.add(imageLabel);
+        client.chatPanel.revalidate();
+    }
+    private void audio(String userText, String audioBase64) {
+        byte[] bytes = Base64.getDecoder().decode(audioBase64);
+        JLabel userLabel = new JLabel(userText);
+        userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
+        userLabel.setForeground(Color.RED);
+        JButton soundButton = new JButton("Play Sound");
+        soundButton.setFont(new Font("Dialog", Font.PLAIN, 20));
+        try {
+            Clip audioClip = AudioSystem.getClip();
+            soundButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        if (soundButton.getText().equals("Play Sound")) {
+                            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+                            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
+                            if (!audioClip.isOpen()) {
+                                audioClip.open(audioInputStream);
+                            }
+                            new Thread(() -> audioClip.start()).start();
+                            soundButton.setText("Stop Sound");
+                        } else {
+                            if (audioClip.isRunning()) {
+                                audioClip.stop();
+                            }
+                            audioClip.flush();
+                            soundButton.setText("Play Sound");
+                        }
+                    }
+                    catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                }
+            });
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        client.chatPanel.add(userLabel);
+        client.chatPanel.add(soundButton);
+        client.chatPanel.revalidate();
+    }
     @Override
     public void run() {
         try {
+            File file = new File(username + "_log.txt");
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            else {
+                Scanner fileScanner = new Scanner(file);
+                // Present the content of the file
+                while (fileScanner.hasNextLine()) {
+                    String command = fileScanner.nextLine();
+                    switch (command) {
+                        case "MESSAGE" -> {
+                            String userText = fileScanner.nextLine();
+                            String message = fileScanner.nextLine();
+                            message(userText, message);
+                        }
+                        case "IMAGE" -> {
+                            String userText = fileScanner.nextLine();
+                            String imageBase64 = fileScanner.nextLine();
+                            image(userText, imageBase64);
+                        }
+                        case "AUDIO" -> {
+                            String userText = fileScanner.nextLine();
+                            String audioBase64 = fileScanner.nextLine();
+                            audio(userText, audioBase64);
+                        }
+                    }
+                }
+                fileScanner.close();
+            }
             Scanner scanner = new Scanner(socket.getInputStream());
+            FileWriter fileWriter = new FileWriter(file, true);
+            PrintWriter filePrinter = new PrintWriter(fileWriter);
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine();
                 switch (command) {
@@ -37,113 +172,40 @@ class ThreadClient extends Thread {
                         String user = scanner.nextLine();
                         long time = Long.parseLong(scanner.nextLine());
                         String message = scanner.nextLine();
-                        JLabel userLabel = new JLabel("User: " + user + " Time: " + (new Date(time)).toString());
-                        JLabel messageLabel = new JLabel(message);
-                        userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
-                        userLabel.setForeground(Color.RED);
-                        messageLabel.setFont(new Font("Dialog", Font.PLAIN, 20));
-                        // Add to panel
-                        client.chatPanel.add(userLabel);
-                        client.chatPanel.add(messageLabel);
-                        client.chatPanel.revalidate();
+                        String userText = "User: " + user + " Time: " + (new Date(time)).toString();
+                        message(userText, message);
 
-                        // Add to database
-
+                        // Add to file
+                        filePrinter.println("MESSAGE");
+                        filePrinter.println(userText);
+                        filePrinter.println(message);
+                        filePrinter.flush();
                     }
                     case "IMAGE" -> {
                         String user = scanner.nextLine();
                         long time = Long.parseLong(scanner.nextLine());
                         String imageBase64 = scanner.nextLine();
-                        byte[] bytes = Base64.getDecoder().decode(imageBase64);
-                        ImageIcon image = new ImageIcon(bytes);
-                        int width = image.getIconWidth();
-                        int height = image.getIconHeight();
-                        if (200.0 / (double)width * (double)height > 150) {
-                            height = (int)(200.0 / (double)width * (double)height);
-                            width = 200;
-                        }
-                        else {
-                            width = (int)(150.0 / (double)height * (double)height);
-                            height = 150;
-                        }
-                        image.setImage(image.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
-                        JLabel imageLabel = new JLabel(image);
-                        imageLabel.addMouseListener(new MouseListener() {
-                            @Override
-                            public void mouseClicked(MouseEvent e) {
-                                JFrame jFrame = new JFrame("Image Viewer");
-                                ImageViewer imageViewer = new ImageViewer();
-                                JPanel jPanel = imageViewer.jPanel;
-                                JScrollPane jScrollPane = imageViewer.jScrollPane;
-                                jScrollPane.getViewport().add(new JLabel(new ImageIcon(bytes)));
-                                jFrame.setPreferredSize(new Dimension(800, 600));
-                                jFrame.setSize(new Dimension(800, 600));
-                                jFrame.setContentPane(jPanel);
-                                jFrame.setLocationRelativeTo(null);
-                                jFrame.setAlwaysOnTop(true);
-                                jFrame.pack();
-                                jFrame.setVisible(true);
-                            }
+                        String userText = "User: " + user + " Time: " + (new Date(time)).toString();
+                        image(userText, imageBase64);
 
-                            @Override
-                            public void mousePressed(MouseEvent e) {}
-
-                            @Override
-                            public void mouseReleased(MouseEvent e) {}
-
-                            @Override
-                            public void mouseEntered(MouseEvent e) {}
-
-                            @Override
-                            public void mouseExited(MouseEvent e) {}
-                        });
-                        JLabel userLabel = new JLabel("User: " + user + " Time: " + (new Date(time)).toString());
-                        userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
-                        userLabel.setForeground(Color.RED);
-                        client.chatPanel.add(userLabel);
-                        client.chatPanel.add(imageLabel);
-                        client.chatPanel.revalidate();
+                        // Add to file
+                        filePrinter.println("IMAGE");
+                        filePrinter.println(userText);
+                        filePrinter.println(imageBase64);
+                        filePrinter.flush();
                     }
                     case "AUDIO" -> {
                         String user = scanner.nextLine();
                         long time = Long.parseLong(scanner.nextLine());
                         String audioBase64 = scanner.nextLine();
-                        byte[] bytes = Base64.getDecoder().decode(audioBase64);
-                        JLabel userLabel = new JLabel("User: " + user + " Time: " + (new Date(time)).toString());
-                        userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
-                        userLabel.setForeground(Color.RED);
-                        JButton soundButton = new JButton("Play Sound");
-                        soundButton.setFont(new Font("Dialog", Font.PLAIN, 20));
-                        Clip audioClip = AudioSystem.getClip();
-                        soundButton.addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                try {
-                                    if (soundButton.getText().equals("Play Sound")) {
-                                        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-                                        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
-                                        if (!audioClip.isOpen()) {
-                                            audioClip.open(audioInputStream);
-                                        }
-                                        new Thread(() -> audioClip.start()).start();
-                                        soundButton.setText("Stop Sound");
-                                    }
-                                    else {
-                                        if (audioClip.isRunning()) {
-                                            audioClip.stop();
-                                        }
-                                        audioClip.flush();
-                                        soundButton.setText("Play Sound");
-                                    }
-                                }
-                                catch (Exception exception) {
-                                    exception.printStackTrace();
-                                }
-                            }
-                        });
-                        client.chatPanel.add(userLabel);
-                        client.chatPanel.add(soundButton);
-                        client.chatPanel.revalidate();
+                        String userText = "User: " + user + " Time: " + (new Date(time)).toString();
+                        audio(userText, audioBase64);
+
+                        // Add to file
+                        filePrinter.println("AUDIO");
+                        filePrinter.println(userText);
+                        filePrinter.println(audioBase64);
+                        filePrinter.flush();
                     }
                     case "ADDUSER" -> {
                         String user = scanner.nextLine();

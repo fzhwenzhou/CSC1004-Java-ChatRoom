@@ -29,7 +29,6 @@ class ThreadServer extends Thread {
                 printWriter.println(username);
                 printWriter.flush();
             });
-            Date date = new Date();
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine();
                 switch (command) {
@@ -56,7 +55,7 @@ class ThreadServer extends Thread {
                                 PrintWriter printEach = new PrintWriter(user.getOutputStream());
                                 printEach.println(command);
                                 printEach.println(this.username);
-                                printEach.println(date.getTime());
+                                printEach.println((new Date()).getTime());
                                 printEach.println(message);
                                 printEach.flush();
                                 // Add to database
