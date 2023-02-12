@@ -1,6 +1,4 @@
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
+import javax.sound.sampled.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
@@ -475,14 +473,40 @@ public class Client {
                             PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                             printWriter.println("CHAT");
                             printWriter.flush();
+                            Thread.sleep(100);
                             Socket chatSocket = new Socket(socket.getInetAddress(), 65535);
                             PrintWriter audioPrinter = new PrintWriter(chatSocket.getOutputStream());
                             Scanner audioScanner = new Scanner(chatSocket.getInputStream());
+                            AudioFormat audioFormat = new AudioFormat(8000f, 16, 1, true, false);
+                            TargetDataLine targetDataLine = AudioSystem.getTargetDataLine(audioFormat);
+                            targetDataLine.open(audioFormat);
+                            targetDataLine.start();
+                            SourceDataLine sourceDataLine = AudioSystem.getSourceDataLine(audioFormat);
+                            sourceDataLine.open(audioFormat);
+                            sourceDataLine.start();
+                            (new Thread(() -> {
+                                try {
+                                    while (isChatting) {
+                                        String audioBase64 = audioScanner.nextLine();
+                                        byte[] bytes = Base64.getDecoder().decode(audioBase64);
+                                        sourceDataLine.write(bytes, 0, bytes.length);
+                                    }
+                                }
+                                catch (Exception exception) {
+                                    exception.printStackTrace();
+                                }
+                            })).start();
+                            byte[] bytes = new byte[1024];
                             while (isChatting) {
-
+                                targetDataLine.read(bytes, 0, bytes.length);
+                                String audioBase64 = Base64.getEncoder().encodeToString(bytes);
+                                audioPrinter.println(audioBase64);
+                                audioPrinter.flush();
                             }
                             audioPrinter.println("STOP CHATTING");
                             audioPrinter.flush();
+                            audioScanner.close();
+                            audioPrinter.close();
                             chatSocket.close();
                         }
                         catch (Exception exception) {
