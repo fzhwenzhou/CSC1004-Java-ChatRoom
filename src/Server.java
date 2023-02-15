@@ -103,6 +103,8 @@ class ThreadServer extends Thread {
                     case "CHAT" -> {
                         ServerSocket serverSocket = new ServerSocket(65535);
                         (new ChatServer(serverSocket.accept())).start();
+                        serverSocket.close();
+                        serverSocket = null;
                     }
                 }
             }

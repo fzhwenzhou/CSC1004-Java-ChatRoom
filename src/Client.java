@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -474,7 +475,8 @@ public class Client {
                             printWriter.println("CHAT");
                             printWriter.flush();
                             Thread.sleep(100);
-                            Socket chatSocket = new Socket(socket.getInetAddress(), 65535);
+                            Socket chatSocket = new Socket();
+                            socket.connect(new InetSocketAddress(socket.getInetAddress(), 65535), 5000);
                             PrintWriter audioPrinter = new PrintWriter(chatSocket.getOutputStream());
                             Scanner audioScanner = new Scanner(chatSocket.getInputStream());
                             AudioFormat audioFormat = new AudioFormat(8000f, 16, 1, true, false);
@@ -487,6 +489,8 @@ public class Client {
                             (new Thread(() -> {
                                 try {
                                     while (isChatting) {
+                                        // For testing only
+                                        // System.err.println("Received one audio");
                                         String audioBase64 = audioScanner.nextLine();
                                         byte[] bytes = Base64.getDecoder().decode(audioBase64);
                                         sourceDataLine.write(bytes, 0, bytes.length);
@@ -497,12 +501,18 @@ public class Client {
                                 }
                             })).start();
                             byte[] bytes = new byte[1024];
+                            // For testing only
+                            // System.err.println("Start Sending Audio");
                             while (isChatting) {
                                 targetDataLine.read(bytes, 0, bytes.length);
                                 String audioBase64 = Base64.getEncoder().encodeToString(bytes);
                                 audioPrinter.println(audioBase64);
                                 audioPrinter.flush();
                             }
+                            sourceDataLine.stop();
+                            targetDataLine.stop();
+                            targetDataLine.close();
+                            sourceDataLine.close();
                             audioPrinter.println("STOP CHATTING");
                             audioPrinter.flush();
                             audioScanner.close();
