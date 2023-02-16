@@ -3,18 +3,73 @@ import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.net.InetSocketAddress;
+import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.concurrent.ForkJoinWorkerThread;
 
+class AudioRecorderThread extends Thread {
+    public static byte[] audio;
+    static ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+    TargetDataLine targetDataLine;
+
+    AudioRecorderThread() {
+        AudioFormat audioFormat = new AudioFormat(8000f, 16, 1, true, false);
+        try {
+            targetDataLine = AudioSystem.getTargetDataLine(audioFormat);
+            targetDataLine.open(audioFormat);
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void run() {
+        targetDataLine.start();
+
+        AudioInputStream audioInputStream = new AudioInputStream(targetDataLine);
+        File file = null;
+        try {
+            file = new File(Math.random() + ".wav");
+            AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, file);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally {
+            try {
+                FileInputStream fileInputStream = new FileInputStream(file);
+                byte bytes[] = new byte[1024];
+                while (fileInputStream.read(bytes) != -1) {
+                    byteArrayOutputStream.write(bytes);
+                }
+                fileInputStream.close();
+            }
+            catch (Exception exception) {
+                exception.printStackTrace();
+            }
+
+            file.delete();
+            audio = byteArrayOutputStream.toByteArray();
+        }
+    }
+
+    public void stopRecording() {
+        targetDataLine.stop();
+        targetDataLine.close();
+        try {
+            this.join();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
 class ThreadClient extends Thread {
     String username;
     Socket socket;
@@ -94,14 +149,16 @@ class ThreadClient extends Thread {
         JButton soundButton = new JButton("Play Sound");
         soundButton.setFont(new Font("Dialog", Font.PLAIN, 20));
         try {
-            Clip audioClip = AudioSystem.getClip();
+
             soundButton.addActionListener(new ActionListener() {
+                Clip audioClip;
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
                         if (soundButton.getText().equals("Play Sound")) {
                             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
                             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
+                            audioClip = AudioSystem.getClip();
                             if (!audioClip.isOpen()) {
                                 audioClip.open(audioInputStream);
                             }
@@ -112,6 +169,7 @@ class ThreadClient extends Thread {
                                 audioClip.stop();
                             }
                             audioClip.flush();
+                            audioClip.close();
                             soundButton.setText("Play Sound");
                         }
                     }
@@ -248,6 +306,7 @@ public class Client {
     private JButton audioButton;
     private JButton emojiButton;
     private JButton voiceChatButton;
+    private JButton speakButton;
     public JPanel chatPanel = new JPanel();
 
     public Client(String username, Socket socket) {
@@ -388,7 +447,7 @@ public class Client {
                 JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.removeChoosableFileFilter(jFileChooser.getAcceptAllFileFilter());
                 jFileChooser.addChoosableFileFilter(new FileFilter() {
-                    String[] extensions = {"wav", "aifc", "aiff", "au", "snd"};
+                    String[] extensions = {"wav", "aifc", "aiff", "au", "snd", "pcm"};
                     @Override
                     public boolean accept(File f) {
                         if (f.isDirectory()) {
@@ -407,7 +466,7 @@ public class Client {
 
                     @Override
                     public String getDescription() {
-                        return "Audio File (*.wav, *.aifc, *.aiff, *.au, *.snd)";
+                        return "Audio File (*.wav, *.aifc, *.aiff, *.au, *.snd, *.pcm)";
                     }
                 });
                 jFileChooser.showDialog(new JLabel(), "Choose");
@@ -526,6 +585,32 @@ public class Client {
                 else {
                     voiceChatButton.setText("Voice Chat");
                     isChatting = false;
+                }
+            }
+        });
+        speakButton.addActionListener(new ActionListener() {
+            static AudioRecorderThread audioThread;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (speakButton.getText().equals("Speak")) {
+                    audioThread = new AudioRecorderThread();
+                    audioThread.start();
+                    speakButton.setText("Stop");
+                }
+                else {
+                    audioThread.stopRecording();
+                    byte[] output = audioThread.audio;
+                    String audioBase64 = Base64.getEncoder().encodeToString(output);
+                    try {
+                        PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+                        printWriter.println("AUDIO");
+                        printWriter.println(audioBase64);
+                        printWriter.flush();
+                    }
+                    catch (Exception exception) {
+                        exception.printStackTrace();
+                    }
+                    speakButton.setText("Speak");
                 }
             }
         });

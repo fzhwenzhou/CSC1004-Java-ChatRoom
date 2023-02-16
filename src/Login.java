@@ -41,8 +41,8 @@ public class Login {
                 Client client = new Client(username, socket);
                 Main.jFrame.setVisible(false);
                 Main.jFrame.setTitle("Client");
-                Main.jFrame.setPreferredSize(new Dimension(550, 600));
-                Main.jFrame.setSize(new Dimension(550, 600));
+                Main.jFrame.setPreferredSize(new Dimension(800, 600));
+                Main.jFrame.setSize(new Dimension(800, 600));
                 Main.jFrame.setContentPane(client.panel1);
                 Main.jFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
                 Main.jFrame.setLocationRelativeTo(null);
