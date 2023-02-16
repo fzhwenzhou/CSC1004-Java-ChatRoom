@@ -101,16 +101,14 @@ class ThreadServer extends Thread {
                         });
                     }
                     case "CHAT" -> {
-                        ServerSocket serverSocket = new ServerSocket(65535);
-                        (new ChatServer(serverSocket.accept())).start();
-                        serverSocket.close();
-                        serverSocket = null;
+                        (new ChatServer(Server.serverSocket.accept())).start();
                     }
                 }
             }
         }
         catch (Exception e) {
             try {
+                e.printStackTrace();
                 users.remove(socket);
                 socket.close();
                 users.forEach((user, username) -> {
@@ -135,6 +133,7 @@ class ThreadServer extends Thread {
 
 }
 public class Server {
+    public static ServerSocket serverSocket;
     public static ArrayList<Socket> chatClients = new ArrayList<Socket>();
     private static boolean register(String username, int age, String gender, String address, String password) {
         try {
@@ -169,6 +168,12 @@ public class Server {
     public JPanel panel1;
 
     public Server() {
+        try {
+            serverSocket = new ServerSocket(65535);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     startServerButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {

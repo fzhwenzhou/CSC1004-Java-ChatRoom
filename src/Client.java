@@ -475,8 +475,7 @@ public class Client {
                             printWriter.println("CHAT");
                             printWriter.flush();
                             Thread.sleep(100);
-                            Socket chatSocket = new Socket();
-                            socket.connect(new InetSocketAddress(socket.getInetAddress(), 65535), 5000);
+                            Socket chatSocket = new Socket(socket.getInetAddress(), 65535);
                             PrintWriter audioPrinter = new PrintWriter(chatSocket.getOutputStream());
                             Scanner audioScanner = new Scanner(chatSocket.getInputStream());
                             AudioFormat audioFormat = new AudioFormat(8000f, 16, 1, true, false);
