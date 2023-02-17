@@ -31,8 +31,9 @@ class ChatServer extends Thread {
                         if (!userSocket.equals(socket)) {
                         // For testing only
                         // if (true) {
-                            audioPrinter.println(audioBase64);
-                            audioPrinter.flush();
+                            PrintWriter printEach = new PrintWriter(userSocket.getOutputStream());
+                            printEach.println(audioBase64);
+                            printEach.flush();
                         }
                     }
                 }
