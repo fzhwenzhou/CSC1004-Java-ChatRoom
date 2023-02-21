@@ -31,9 +31,16 @@ class ChatServer extends Thread {
                         if (!userSocket.equals(socket)) {
                         // For testing only
                         // if (true) {
-                            PrintWriter printEach = new PrintWriter(userSocket.getOutputStream());
-                            printEach.println(audioBase64);
-                            printEach.flush();
+                            (new Thread(() -> {
+                                try {
+                                    PrintWriter printEach = new PrintWriter(userSocket.getOutputStream());
+                                    printEach.println(audioBase64);
+                                    printEach.flush();
+                                }
+                                catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            })).start();
                         }
                     }
                 }
