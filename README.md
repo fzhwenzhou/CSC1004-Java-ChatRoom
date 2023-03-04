@@ -1,2 +1,2 @@
-# CSC1004-Java-ProjectTopics
-CSC1004 Java Project
+# CSC1004-Java-ChatRoom
+CSC1004 Java Chat Room
