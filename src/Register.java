@@ -19,6 +19,7 @@ public class Register {
     private JTextField addressTextField1;
     private JPasswordField passwordField2;
     private JComboBox<String> genderComboBox;
+    private JButton returnToLoginButton;
 
     public Register() {
     button1.addActionListener(new ActionListener() {
@@ -76,15 +77,6 @@ public class Register {
                             "Successfully registered. You can return to the login page and login.",
                             "Successfully Registered",
                             JOptionPane.INFORMATION_MESSAGE);
-                    Main.jFrame.setVisible(false);
-                    Main.jFrame = new JFrame("Login");
-                    Main.jFrame.setPreferredSize(new Dimension(600, 450));
-                    Main.jFrame.setSize(new Dimension(600, 450));
-                    Main.jFrame.setContentPane((new Login()).panel1);
-                    Main.jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    Main.jFrame.setLocationRelativeTo(null);
-                    Main.jFrame.pack();
-                    Main.jFrame.setVisible(true);
                 }
                 else {
                     JOptionPane.showMessageDialog(null,
@@ -101,5 +93,19 @@ public class Register {
             }
         }
     });
-}
+        returnToLoginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Main.jFrame.setVisible(false);
+                Main.jFrame = new JFrame("Login");
+                Main.jFrame.setPreferredSize(new Dimension(600, 450));
+                Main.jFrame.setSize(new Dimension(600, 450));
+                Main.jFrame.setContentPane((new Login()).panel1);
+                Main.jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                Main.jFrame.setLocationRelativeTo(null);
+                Main.jFrame.pack();
+                Main.jFrame.setVisible(true);
+            }
+        });
+    }
 }

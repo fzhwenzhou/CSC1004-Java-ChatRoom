@@ -490,7 +490,7 @@ public class Client {
             public void actionPerformed(ActionEvent e) {
                 JFrame jFrame = new JFrame("Emoji Selector");
                 DefaultListModel<String> emojiList = new DefaultListModel<String>();
-                for (char i = '\uDE00'; i < '\uDE70'; i++) {
+                for (char i = '\uDE00'; i < '\uDE50'; i++) {
                     String emoji = "\uD83D" + i;
                     emojiList.addElement(emoji);
                 }
