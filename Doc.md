@@ -33,8 +33,8 @@ Platform Related:
 2. Java Thread for chat client and voice chat client.
 3. Java Socket for chat client, voice chat client, login, and register.
 4. javax.sound.sampled for playing and recording audio.
-5. SQLite database for server to store data.
-6. sqlite-jdbc for connect SQLite database to Java.
+5. SQLite database for storing data on server.
+6. sqlite-jdbc for connecting SQLite database to Java.
 7. File I/O for message history.
 
 ## Usage
