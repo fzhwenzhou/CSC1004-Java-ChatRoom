@@ -14,6 +14,7 @@ class ChatServer extends Thread {
     Socket socket;
     ChatServer(Socket socket) {
         this.socket = socket;
+        // Add this socket to the user socket list
         Server.chatClients.add(socket);
     }
     @Override
@@ -23,16 +24,20 @@ class ChatServer extends Thread {
             Scanner audioScanner = new Scanner(socket.getInputStream());
             while (audioScanner.hasNextLine()) {
                 String audioBase64 = audioScanner.nextLine();
+                // If the user clicks "Stop Chat" in the client
                 if (audioBase64.equals("STOP CHATTING")) {
                     break;
                 }
+                // Broadcast the audio message to all the users
                 else {
                     for (Socket userSocket : Server.chatClients) {
+                        // Not broadcasting to itself
                         if (!userSocket.equals(socket)) {
                         // For testing only
                         // if (true) {
                             (new Thread(() -> {
                                 try {
+                                    // Print Base64
                                     PrintWriter printEach = new PrintWriter(userSocket.getOutputStream());
                                     printEach.println(audioBase64);
                                     printEach.flush();
@@ -57,6 +62,7 @@ class ThreadServer extends Thread {
     Socket socket;
     String username;
     HashMap<Socket, String> users;
+    // Initialize thread server
     ThreadServer(Socket socket, String username, HashMap<Socket, String> users) {
         this.socket = socket;
         this.username = username;
@@ -67,14 +73,17 @@ class ThreadServer extends Thread {
         try {
             PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
             Scanner scanner = new Scanner(socket.getInputStream());
+            // Add user to everyone's user list
             users.forEach((user, username) -> {
                 printWriter.println("ADDUSER");
                 printWriter.println(username);
                 printWriter.flush();
             });
             while (scanner.hasNextLine()) {
+                // Get command
                 String command = scanner.nextLine();
                 switch (command) {
+                    // User log out or close the window
                     case "LOGOUT" -> {
                         users.remove(socket);
                         socket.close();
@@ -91,6 +100,8 @@ class ThreadServer extends Thread {
                         });
                         return;
                     }
+                    // Receive message, image or audio
+                    // Broadcast it to others
                     case "MESSAGE", "IMAGE", "AUDIO" -> {
                         String message = scanner.nextLine();
                         users.forEach((user, username) -> {
@@ -108,6 +119,7 @@ class ThreadServer extends Thread {
                             }
                         });
                     }
+                    // Create a chat server to enable them to chat
                     case "CHAT" -> {
                         (new ChatServer(Server.serverSocket.accept())).start();
                     }
@@ -117,6 +129,7 @@ class ThreadServer extends Thread {
         catch (Exception e) {
             try {
                 e.printStackTrace();
+                // If disconnected unexpectedly
                 users.remove(socket);
                 socket.close();
                 users.forEach((user, username) -> {
@@ -143,8 +156,10 @@ class ThreadServer extends Thread {
 public class Server {
     public static ServerSocket serverSocket;
     public static ArrayList<Socket> chatClients = new ArrayList<Socket>();
+    // Register
     private static boolean register(String username, int age, String gender, String address, String password) {
         try {
+            // Send register query to database
             SQLiteDatabase database = new SQLiteDatabase((new File("")).getCanonicalPath() + "/sqlite.db");
             if (!database.tableExists()) {
                 database.createTable();
@@ -176,8 +191,9 @@ public class Server {
     public JPanel panel1;
 
     public Server() {
+        // Start a new server
         try {
-            serverSocket = new ServerSocket(65535);
+            serverSocket = new ServerSocket(65535); // For voice chat
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -188,6 +204,7 @@ public class Server {
             if (startServerButton.getText().equals("Start Server")) {
                 String address = textField1.getText();
                 String port = textField2.getText();
+                // Continuously listen for clients to join in
                 (new Thread(() -> {
                     try {
                         HashMap<Socket, String> users = new HashMap<Socket, String>();
@@ -197,6 +214,7 @@ public class Server {
                             Scanner scanner = new Scanner(socket.getInputStream());
                             PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                             String message = scanner.nextLine();
+                            // Perform register
                             if (message.equals("REGISTER")) {
                                 if (register(scanner.nextLine(), Integer.parseInt(scanner.nextLine()), scanner.nextLine(), scanner.nextLine(), scanner.nextLine())) {
                                     printWriter.println("SUCCESS");
@@ -211,11 +229,13 @@ public class Server {
                             else {
                                 String[] loginMessage = message.split(":");
                                 if (userPassInDatabase(loginMessage[0], loginMessage[1])) {
+                                    // Already logged in
                                     if (users.containsValue(loginMessage[0])) {
                                         printWriter.println("LOGGEDIN");
                                         printWriter.flush();
                                         continue;
                                     }
+                                    // Add to user list
                                     users.forEach((user, username) -> {
                                         try {
                                             PrintWriter printEach = new PrintWriter(user.getOutputStream());
@@ -239,6 +259,7 @@ public class Server {
                             }
                         }
                     }
+                    // Handle some exceptions
                     catch (Exception exception) {
                         JOptionPane.showMessageDialog(null,
                                 "Failed to start the server. Check if address or port is valid.",

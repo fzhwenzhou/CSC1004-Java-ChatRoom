@@ -19,6 +19,7 @@ class AudioRecorderThread extends Thread {
 
     AudioRecorderThread() {
         AudioFormat audioFormat = new AudioFormat(8000f, 16, 1, true, false);
+        // Record audio
         try {
             targetDataLine = AudioSystem.getTargetDataLine(audioFormat);
             targetDataLine.open(audioFormat);
@@ -31,10 +32,11 @@ class AudioRecorderThread extends Thread {
     @Override
     public void run() {
         targetDataLine.start();
-
+        // Create audio line
         AudioInputStream audioInputStream = new AudioInputStream(targetDataLine);
         File file = null;
         try {
+            // Save the audio to a temp file
             file = new File(Math.random() + ".wav");
             AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, file);
         }
@@ -42,9 +44,11 @@ class AudioRecorderThread extends Thread {
             e.printStackTrace();
         }
         finally {
+            // The record has been stopped
             try {
                 FileInputStream fileInputStream = new FileInputStream(file);
                 byte bytes[] = new byte[1024];
+                // Continuously read the bytes from byte output stream to file
                 while (fileInputStream.read(bytes) != -1) {
                     byteArrayOutputStream.write(bytes);
                 }
@@ -53,13 +57,14 @@ class AudioRecorderThread extends Thread {
             catch (Exception exception) {
                 exception.printStackTrace();
             }
-
+            // Delete the temp file
             file.delete();
             audio = byteArrayOutputStream.toByteArray();
         }
     }
 
     public void stopRecording() {
+        // Stop target line
         targetDataLine.stop();
         targetDataLine.close();
         try {
@@ -80,6 +85,7 @@ class ThreadClient extends Thread {
         this.client = client;
     }
     private void message(String userText, String message) {
+        // Receive one message
         JLabel userLabel = new JLabel(userText);
         JLabel messageLabel = new JLabel(message);
         userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
@@ -91,10 +97,12 @@ class ThreadClient extends Thread {
         client.chatPanel.revalidate();
     }
     private void image(String userText, String imageBase64) {
+        // Receive one image
         byte[] bytes = Base64.getDecoder().decode(imageBase64);
         ImageIcon image = new ImageIcon(bytes);
         int width = image.getIconWidth();
         int height = image.getIconHeight();
+        // Adjust the size of the thumbnail
         if (200.0 / (double)width * (double)height > 150) {
             height = (int)(200.0 / (double)width * (double)height);
             width = 200;
@@ -105,6 +113,7 @@ class ThreadClient extends Thread {
         }
         image.setImage(image.getImage().getScaledInstance(width, height, Image.SCALE_DEFAULT));
         JLabel imageLabel = new JLabel(image);
+        // When clicking on the thumbnail, it opens the image viewer
         imageLabel.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -112,6 +121,7 @@ class ThreadClient extends Thread {
                 ImageViewer imageViewer = new ImageViewer();
                 JPanel jPanel = imageViewer.jPanel;
                 JScrollPane jScrollPane = imageViewer.jScrollPane;
+                // Full sized image
                 jScrollPane.getViewport().add(new JLabel(new ImageIcon(bytes)));
                 jFrame.setPreferredSize(new Dimension(800, 600));
                 jFrame.setSize(new Dimension(800, 600));
@@ -134,6 +144,7 @@ class ThreadClient extends Thread {
             @Override
             public void mouseExited(MouseEvent e) {}
         });
+        // Add the image thumbnail to the list
         JLabel userLabel = new JLabel(userText);
         userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
         userLabel.setForeground(Color.RED);
@@ -142,29 +153,35 @@ class ThreadClient extends Thread {
         client.chatPanel.revalidate();
     }
     private void audio(String userText, String audioBase64) {
+        // Receive one audio
         byte[] bytes = Base64.getDecoder().decode(audioBase64);
         JLabel userLabel = new JLabel(userText);
         userLabel.setFont(new Font("Dialog", Font.PLAIN, 16));
         userLabel.setForeground(Color.RED);
+        // Add one button
         JButton soundButton = new JButton("Play Sound");
         soundButton.setFont(new Font("Dialog", Font.PLAIN, 20));
         try {
-
+            // Play the sound when click on the button
             soundButton.addActionListener(new ActionListener() {
                 Clip audioClip;
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
+                        // If the sound has not been played
                         if (soundButton.getText().equals("Play Sound")) {
                             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
                             AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(byteArrayInputStream);
                             audioClip = AudioSystem.getClip();
+                            // Handle some unexpected situation
                             if (!audioClip.isOpen()) {
                                 audioClip.open(audioInputStream);
                             }
                             new Thread(() -> audioClip.start()).start();
                             soundButton.setText("Stop Sound");
-                        } else {
+                            // If it is playing
+                        }
+                        else {
                             if (audioClip.isRunning()) {
                                 audioClip.stop();
                             }
@@ -182,6 +199,7 @@ class ThreadClient extends Thread {
         catch (Exception e) {
             e.printStackTrace();
         }
+        // Add button to the panel
         client.chatPanel.add(userLabel);
         client.chatPanel.add(soundButton);
         client.chatPanel.revalidate();
@@ -189,7 +207,9 @@ class ThreadClient extends Thread {
     @Override
     public void run() {
         try {
+            // Read the message history
             File file = new File(username + "_log.txt");
+            // No file
             if (!file.exists()) {
                 file.createNewFile();
             }
@@ -224,6 +244,7 @@ class ThreadClient extends Thread {
             while (scanner.hasNextLine()) {
                 String command = scanner.nextLine();
                 switch (command) {
+                    // If it is a message
                     case "MESSAGE" -> {
                         String user = scanner.nextLine();
                         long time = Long.parseLong(scanner.nextLine());
@@ -238,6 +259,7 @@ class ThreadClient extends Thread {
                         filePrinter.flush();
                     }
                     case "IMAGE" -> {
+                        // If it is an image
                         String user = scanner.nextLine();
                         long time = Long.parseLong(scanner.nextLine());
                         String imageBase64 = scanner.nextLine();
@@ -251,6 +273,7 @@ class ThreadClient extends Thread {
                         filePrinter.flush();
                     }
                     case "AUDIO" -> {
+                        // If it is an audio
                         String user = scanner.nextLine();
                         long time = Long.parseLong(scanner.nextLine());
                         String audioBase64 = scanner.nextLine();
@@ -264,11 +287,13 @@ class ThreadClient extends Thread {
                         filePrinter.flush();
                     }
                     case "ADDUSER" -> {
+                        // Add one user to the list
                         String user = scanner.nextLine();
                         client.defaultListModel.addElement(user);
                         client.list1.setModel(client.defaultListModel);
                     }
                     case "DELUSER" -> {
+                        // Delete one user to the list
                         String user = scanner.nextLine();
                         client.defaultListModel.removeElement(user);
                         client.list1.setModel(client.defaultListModel);
@@ -277,6 +302,7 @@ class ThreadClient extends Thread {
             }
         }
         catch (Exception e) {
+            // Something unexpected happens. Log out.
             try {
                 PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                 printWriter.println("LOGOUT");
@@ -324,6 +350,7 @@ public class Client {
             public void windowClosing(WindowEvent e) {
                 super.windowClosing(e);
                 try {
+                    // Log out when close the window
                     PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                     printWriter.println("LOGOUT");
                     printWriter.flush();
@@ -336,6 +363,7 @@ public class Client {
             }
         });
     logoutButton.addActionListener(new ActionListener() {
+        // Log out when clicking the "Logout" button
         @Override
         public void actionPerformed(ActionEvent e) {
             try {
@@ -347,6 +375,7 @@ public class Client {
             catch (Exception exception) {
                 exception.printStackTrace();
             }
+            // Return to the login frame
             Main.jFrame.setVisible(false);
             Main.jFrame = new JFrame("Login");
             Main.jFrame.setPreferredSize(new Dimension(600, 450));
@@ -359,8 +388,10 @@ public class Client {
         }
     });
         sendButton.addActionListener(new ActionListener() {
+            // When the "Send" button was hit
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Nothing inside
                 if (textField1.getText().equals("")) {
                     return;
                 }
@@ -376,6 +407,7 @@ public class Client {
                 }
             }
         });
+        // If "enter/return" was pressed
         textField1.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -397,12 +429,15 @@ public class Client {
                 }
             }
         });
+        // Image button
         imageButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.removeChoosableFileFilter(jFileChooser.getAcceptAllFileFilter());
+                // Filters for file chooser
                 jFileChooser.addChoosableFileFilter(new FileFilter() {
+                    // Available extensions
                     String[] extensions = {"jpg", "png", "jpeg", "gif", "bmp"};
                     @Override
                     public boolean accept(File f) {
@@ -427,6 +462,7 @@ public class Client {
                 });
                 jFileChooser.showDialog(new JLabel(), "Choose");
                 File file = jFileChooser.getSelectedFile();
+                // Read the file
                 if (file != null) {
                     try {
                         byte[] bytes = Files.readAllBytes(file.toPath());
@@ -441,12 +477,15 @@ public class Client {
                 }
             }
         });
+        // Audio button
         audioButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.removeChoosableFileFilter(jFileChooser.getAcceptAllFileFilter());
+                // Filters for file chooser
                 jFileChooser.addChoosableFileFilter(new FileFilter() {
+                    // Available file extensions
                     String[] extensions = {"wav", "aifc", "aiff", "au", "snd", "pcm"};
                     @Override
                     public boolean accept(File f) {
@@ -471,6 +510,7 @@ public class Client {
                 });
                 jFileChooser.showDialog(new JLabel(), "Choose");
                 File file = jFileChooser.getSelectedFile();
+                // Read the file
                 if (file != null) {
                     try {
                         byte[] bytes = Files.readAllBytes(file.toPath());
@@ -489,7 +529,9 @@ public class Client {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFrame jFrame = new JFrame("Emoji Selector");
+                // List to store emoji
                 DefaultListModel<String> emojiList = new DefaultListModel<String>();
+                // Store some emojis (Unicode) to the list
                 for (char i = '\uDE00'; i < '\uDE50'; i++) {
                     String emoji = "\uD83D" + i;
                     emojiList.addElement(emoji);
@@ -503,16 +545,19 @@ public class Client {
                 jFrame.setAlwaysOnTop(true);
                 jFrame.pack();
                 jFrame.setVisible(true);
+                // Create a thread to listen if the emoji is selected
                 (new Thread(() -> {
                     while (emojiSelector.emoji == -1 && jFrame.isVisible()) {
                         // Do nothing
                         try {
+                            // Prevent stuck on Windows
                             Thread.sleep(1);
                         }
                         catch (Exception exception) {
                             exception.printStackTrace();
                         }
                     }
+                    // If the window is not closed directly
                     if (emojiSelector.emoji != -1) {
                         textField1.setText(textField1.getText() + emojiList.getElementAt(EmojiSelector.emoji));
                     }
@@ -522,7 +567,9 @@ public class Client {
             }
         });
         voiceChatButton.addActionListener(new ActionListener() {
+            // Initialize
             static boolean isChatting = false;
+            // Voice chat
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (voiceChatButton.getText().equals("Voice Chat")) {
@@ -530,6 +577,7 @@ public class Client {
                     isChatting = true;
                     (new Thread(() -> {
                         try {
+                            // Start Chatting
                             PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                             printWriter.println("CHAT");
                             printWriter.flush();
@@ -537,6 +585,7 @@ public class Client {
                             Socket chatSocket = new Socket(socket.getInetAddress(), 65535);
                             PrintWriter audioPrinter = new PrintWriter(chatSocket.getOutputStream());
                             Scanner audioScanner = new Scanner(chatSocket.getInputStream());
+                            // Get data lines
                             AudioFormat audioFormat = new AudioFormat(8000f, 16, 1, true, false);
                             TargetDataLine targetDataLine = AudioSystem.getTargetDataLine(audioFormat);
                             targetDataLine.open(audioFormat);
@@ -549,6 +598,7 @@ public class Client {
                                     while (isChatting) {
                                         // For testing only
                                         // System.err.println("Received one audio");
+                                        // Continuously listen
                                         String audioBase64 = audioScanner.nextLine();
                                         byte[] bytes = Base64.getDecoder().decode(audioBase64);
                                         sourceDataLine.write(bytes, 0, bytes.length);
@@ -561,12 +611,14 @@ public class Client {
                             byte[] bytes = new byte[1024];
                             // For testing only
                             // System.err.println("Start Sending Audio");
+                            // Continuously send
                             while (isChatting) {
                                 targetDataLine.read(bytes, 0, bytes.length);
                                 String audioBase64 = Base64.getEncoder().encodeToString(bytes);
                                 audioPrinter.println(audioBase64);
                                 audioPrinter.flush();
                             }
+                            // Stop all the lines
                             sourceDataLine.stop();
                             targetDataLine.stop();
                             targetDataLine.close();
@@ -583,6 +635,7 @@ public class Client {
                     })).start();
                 }
                 else {
+                    // Stop chatting
                     voiceChatButton.setText("Voice Chat");
                     isChatting = false;
                 }
@@ -592,15 +645,18 @@ public class Client {
             static AudioRecorderThread audioThread;
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Start speaking
                 if (speakButton.getText().equals("Speak")) {
                     audioThread = new AudioRecorderThread();
                     audioThread.start();
                     speakButton.setText("Stop");
                 }
+                // Stop speaking
                 else {
                     audioThread.stopRecording();
                     byte[] output = audioThread.audio;
                     String audioBase64 = Base64.getEncoder().encodeToString(output);
+                    // Write the audio to the server
                     try {
                         PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                         printWriter.println("AUDIO");

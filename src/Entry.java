@@ -11,6 +11,7 @@ public Entry() {
     clientModeButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
+            // This button directs you to the login page.
             Main.jFrame.setVisible(false);
             Main.jFrame = new JFrame("Login");
             Main.jFrame.setPreferredSize(new Dimension(600, 450));
@@ -25,6 +26,7 @@ public Entry() {
     serverModeButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
+            // This button directs you to the server page.
             Main.jFrame.setVisible(false);
             Main.jFrame = new JFrame("Server");
             Main.jFrame.setPreferredSize(new Dimension(600, 450));

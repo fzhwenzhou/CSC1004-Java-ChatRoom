@@ -25,6 +25,7 @@ public class Register {
     button1.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
+            // Get all the information in the field
             String address = addressTextField.getText();
             String port = portTextField.getText();
             String username = usernameTextField.getText();
@@ -33,6 +34,7 @@ public class Register {
             String address1 = addressTextField1.getText();
             String password1 = "", password2 = "";
             try {
+                // Get encrypted password
                 password1 = (new BigInteger(1, MessageDigest.getInstance("md5").digest(passwordField1.getText().getBytes()))).toString(16);
                 password2 = (new BigInteger(1, MessageDigest.getInstance("md5").digest(passwordField2.getText().getBytes()))).toString(16);
             }
@@ -41,10 +43,12 @@ public class Register {
             }
             int ageNumber, portNumber;
             try {
+                // Check if age is valid
                 ageNumber = Integer.parseInt(age);
                 if (ageNumber < 0) {
                     throw new Exception();
                 }
+                // Check if port is valid
                 portNumber = Integer.parseInt(port);
             }
             catch (Exception exception) {
@@ -54,6 +58,7 @@ public class Register {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            // Check if password is match
             if (!password1.equals(password2)) {
                 JOptionPane.showMessageDialog(null,
                         "The password you have inputted the first time is not the same as the second's.",
@@ -62,6 +67,7 @@ public class Register {
                 return;
             }
             try {
+                // Send register information to the server
                 Socket socket = new Socket(address, portNumber);
                 PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                 Scanner scanner = new Scanner(socket.getInputStream());
@@ -72,12 +78,14 @@ public class Register {
                 printWriter.println(address1);
                 printWriter.println(password1);
                 printWriter.flush();
+                // Server returned success
                 if (scanner.nextLine().equals("SUCCESS")) {
                     JOptionPane.showMessageDialog(null,
                             "Successfully registered. You can return to the login page and login.",
                             "Successfully Registered",
                             JOptionPane.INFORMATION_MESSAGE);
                 }
+                // Server returned failed
                 else {
                     JOptionPane.showMessageDialog(null,
                             "Failed to register. Username is already occupied.",
@@ -85,6 +93,7 @@ public class Register {
                             JOptionPane.ERROR_MESSAGE);
                 }
             }
+            // Connection loss
             catch (Exception exception) {
                 JOptionPane.showMessageDialog(null,
                         "Error while connecting to server. Check your address and port.",
@@ -93,6 +102,7 @@ public class Register {
             }
         }
     });
+    // Return to the login form
         returnToLoginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

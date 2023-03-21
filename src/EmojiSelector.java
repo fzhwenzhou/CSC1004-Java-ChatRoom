@@ -15,6 +15,7 @@ public EmojiSelector() {
     selectButton.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
+            // Set the emoji selected
             emoji = list.getSelectedIndex();
         }
     });

@@ -20,23 +20,28 @@ public class Login {
     private JPasswordField passwordField1;
     private JButton registerButton;
     private void login() {
+        // Get the information from the fields
         String address = textField1.getText();
         String port = textField2.getText();
         String username = textField3.getText();
         String password = "";
         try {
+            // Password encryption with MD5
             password = (new BigInteger(1, MessageDigest.getInstance("md5").digest(passwordField1.getText().getBytes()))).toString(16);
         }
         catch (NoSuchAlgorithmException exception) {
-            // Actually nothing to handle here.
+            exception.printStackTrace();
         }
         try {
+            // Create socket, scanner and print writer.
             Socket socket = new Socket(address, Integer.parseInt(port));
             Scanner scanner = new Scanner(socket.getInputStream());
             PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
             printWriter.println(username + ":" + password);
             printWriter.flush();
+            // Get the message from server after sending username and password
             String message = scanner.nextLine();
+            // Permission granted. Go to client form.
             if (message.equals("GRANTED")) {
                 Client client = new Client(username, socket);
                 Main.jFrame.setVisible(false);
@@ -49,12 +54,14 @@ public class Login {
                 Main.jFrame.pack();
                 Main.jFrame.setVisible(true);
             }
+            // User already logged in.
             else if (message.equals("LOGGEDIN")) {
                 JOptionPane.showMessageDialog(null,
                         "Login failed. User already logged in.",
                         "Login Failed",
                         JOptionPane.ERROR_MESSAGE);
             }
+            // Username or password mismatch
             else {
                 JOptionPane.showMessageDialog(null,
                         "Login failed. Check your username and password.",
@@ -62,6 +69,7 @@ public class Login {
                         JOptionPane.ERROR_MESSAGE);
             }
         }
+        // Error when connecting to server
         catch (Exception exception) {
             JOptionPane.showMessageDialog(null,
                     "Error while connecting to server. Check your address and port.",
@@ -72,12 +80,14 @@ public class Login {
 
     public Login() {
     button1.addActionListener(new ActionListener() {
+        // "Login" button was clicked
         @Override
         public void actionPerformed(ActionEvent e) {
             login();
         }
     });
         registerButton.addActionListener(new ActionListener() {
+            // "Register" button was clicked
             @Override
             public void actionPerformed(ActionEvent e) {
                 Main.jFrame.setVisible(false);
@@ -91,6 +101,7 @@ public class Login {
                 Main.jFrame.setVisible(true);
             }
         });
+        // When you pressed "enter/return" in the password field, it will try to log in.
         passwordField1.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {

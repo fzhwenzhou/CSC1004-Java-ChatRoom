@@ -4,6 +4,7 @@ import java.sql.*;
 public class SQLiteDatabase {
     Connection connection;
     Statement statement;
+    // Initialize the database connection
     SQLiteDatabase(String name) {
         try {
             Class.forName("org.sqlite.JDBC");
@@ -15,6 +16,7 @@ public class SQLiteDatabase {
             e.printStackTrace();
         }
     }
+    // Initialize the table
     public void createTable() {
         try {
             String sql =
@@ -30,6 +32,7 @@ public class SQLiteDatabase {
             e.printStackTrace();
         }
     }
+    // Check if table exists
     public boolean tableExists() {
         try {
             DatabaseMetaData databaseMetaData = connection.getMetaData();
@@ -41,20 +44,24 @@ public class SQLiteDatabase {
         }
         return false;
     }
+    // Query login
     public boolean loginQuery(String username, String password) {
         try {
             String sql = "SELECT * FROM USERS WHERE USERNAME='" + username + "'";
             ResultSet resultSet = statement.executeQuery(sql);
             if (resultSet.next()) {
+                // Password match
                 if (resultSet.getString("PASSWORD").equals(password)) {
                     close();
                     return true;
                 }
+                // Password mismatch
                 else {
                     close();
                     return false;
                 }
             }
+            // No user
             else {
                 close();
                 return false;
@@ -71,10 +78,12 @@ public class SQLiteDatabase {
             // Find if available
             String sql = "SELECT * FROM USERS WHERE USERNAME='" + username + "'";
             ResultSet resultSet = statement.executeQuery(sql);
+            // User already exists
             if (resultSet.next()) {
                 close();
                 return false;
             }
+            // Insert into it
             else {
                 sql = "INSERT INTO USERS (USERNAME, AGE, GENDER, ADDRESS, PASSWORD)" +
                         "VALUES ('" + username + "'," + age + ",'" + gender + "', '" + address + "', '" + password + "');";
@@ -88,6 +97,7 @@ public class SQLiteDatabase {
         }
         return false;
     }
+    // Close the connection
     public void close() {
         try {
             statement.close();
