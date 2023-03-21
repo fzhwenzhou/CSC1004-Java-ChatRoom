@@ -403,7 +403,7 @@ public class Client {
                 JFileChooser jFileChooser = new JFileChooser();
                 jFileChooser.removeChoosableFileFilter(jFileChooser.getAcceptAllFileFilter());
                 jFileChooser.addChoosableFileFilter(new FileFilter() {
-                    String[] extensions = {"jpg", "png", "jpeg", "gif"};
+                    String[] extensions = {"jpg", "png", "jpeg", "gif", "bmp"};
                     @Override
                     public boolean accept(File f) {
                         if (f.isDirectory()) {
@@ -422,7 +422,7 @@ public class Client {
 
                     @Override
                     public String getDescription() {
-                        return "Image File (*.jpg, *.png, *.jpeg, *.gif)";
+                        return "Image File (*.jpg, *.png, *.jpeg, *.gif, *.bmp)";
                     }
                 });
                 jFileChooser.showDialog(new JLabel(), "Choose");
