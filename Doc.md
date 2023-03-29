@@ -38,7 +38,7 @@ Platform Related:
 7. File I/O for message history.
 
 ## Usage
-1. Running the program. On most of the operating systems, double click on "ChatRoom.jar" is enough. But if it's not applicable for your operating system, you can manually run it by executing "java -jar ChatRoom.jar" in the terminal. Be sure that the version of JRE must be 17 or above.
+1. Running the program. On most of the operating systems, double click on "ut/artifacts/ChatRoom_jar/ChatRoom.jar" is enough. But if it's not applicable for your operating system, you can manually run it by executing "java -jar ChatRoom.jar" in the terminal. Be sure that the version of JRE must be 17 or above.
 2. Entry form. This form has two buttons: "Server Mode" and "Client Mode." You can enter either of the modes by clicking on the specific button.
 3. Server form. This form has three components: one "Server Address" text box, one "Server Port" text box, and one "Start Server" button. The default value of "Server Address" is 127.0.0.1, that is, it is a loopback address. To bind your server to some specific address, please enter it in this text box. Or if you want to broadcast it to all of the addresses, please input "0.0.0.0" to the text box. The default value of "Server Port" is 32768. If this port is occupied or you want to use another port, please modify this field. Click "Start Server" to start the server.
 4. Login form. This form is used to login. You must set the "Server Address" and "Server Port" fields to the exact address and port of server. Then you can enter the username and the password in the following two fields. The content of the password field is invisible. You'll only see dots on it. Then you can click on "Login" button or hit the "enter/return" key on the keyboard, and you'll be in "Client" form. If you don't have an account, you can register one after clicking the "Register" button.
@@ -49,3 +49,15 @@ Platform Related:
 9. Sending pictures. You can click on "Image" button, and it will pop up a file-choosing window. You can choose one image in this window. After clicking on "Choose," the picture will be sent. If the image is large, it may take a few seconds. After that, the thumbnail of the image will appear in the message list. Click on the image and it will pop up one "Image Viewer." This enables you to view the full sized image and you can change the size of this window.
 10. Sending audios (sending videos in the requirement but I doubt if it is a typo). You can click on "Audio" button, and it will pop up a file-choosing window. You can choose one audio file in this window. After clicking on "Choose," the audio will be sent. You can also click on "Speak" and then record the sound. Click "Stop" to stop recording. Then your sound will be sent. Note that if you're on macOS, you may have to grant the permission of using microphone. One "Play Audio" button will appear in the message list. Click on the button to play the sound. If the sound if playing, you can click on "Stop Audio" to stop the audio.
 11. Voice chat. Click on "Voice Chat" to get into the voice chat room. Click on "Stop Chat" to stop chatting. Note that you must have two or more computers to test this function, because you won't be able to hear your own sound when chatting.
+
+## Building
+Pre-requisite:
+- macOS or Windows (Linux might not work)
+- OpenJDK 17+ (Lower version of JDK is not guaranteed to work)
+- IntelliJ IDEA
+
+Steps:
+1. Import the project into IntelliJ IDEA.
+2. Click "Build" on the top.
+3. Click "Build Artifacts."
+4. Click "Build" again when it pops up a menu.

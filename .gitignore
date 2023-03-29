@@ -1,6 +1,8 @@
 ### IntelliJ IDEA ###
 sqlite.db
-out/
+out/production/
+out/artifacts/ChatRoom_jar/*
+!out/artifacts/ChatRoom_jar/ChatRoom.jar
 !**/src/main/**/out/
 !**/src/test/**/out/
 
