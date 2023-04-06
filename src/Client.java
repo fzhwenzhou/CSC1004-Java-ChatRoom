@@ -460,7 +460,7 @@ public class Client {
                         return "Image File (*.jpg, *.png, *.jpeg, *.gif, *.bmp)";
                     }
                 });
-                jFileChooser.showDialog(new JLabel(), "Choose");
+                jFileChooser.showOpenDialog(new JLabel());
                 File file = jFileChooser.getSelectedFile();
                 // Read the file
                 if (file != null) {
@@ -508,7 +508,7 @@ public class Client {
                         return "Audio File (*.wav, *.aifc, *.aiff, *.au, *.snd, *.pcm)";
                     }
                 });
-                jFileChooser.showDialog(new JLabel(), "Choose");
+                jFileChooser.showOpenDialog(new JLabel());
                 File file = jFileChooser.getSelectedFile();
                 // Read the file
                 if (file != null) {

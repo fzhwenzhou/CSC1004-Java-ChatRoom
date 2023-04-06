@@ -58,6 +58,18 @@ public class Register {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
+            boolean usernameInvalid = false, addressInvalid = false;
+            for (String s : new String[]{"'", "\"", "%", "(", ")", ":"}) {
+                usernameInvalid = usernameInvalid || username.contains(s);
+                addressInvalid = addressInvalid || address.contains(s);
+            }
+            if (usernameInvalid || addressInvalid) {
+                JOptionPane.showMessageDialog(null,
+                        "Invalid Input. \"', \", %, (, ), :\" cannot appear in the fields.",
+                        "Invalid Input",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             // Check if password is match
             if (!password1.equals(password2)) {
                 JOptionPane.showMessageDialog(null,

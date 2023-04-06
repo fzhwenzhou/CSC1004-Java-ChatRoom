@@ -41,6 +41,18 @@ public class Login {
             printWriter.flush();
             // Get the message from server after sending username and password
             String message = scanner.nextLine();
+            boolean usernameInvalid = false, addressInvalid = false;
+            for (String s : new String[]{"'", "\"", "%", "(", ")", ":"}) {
+                usernameInvalid = usernameInvalid || username.contains(s);
+                addressInvalid = addressInvalid || address.contains(s);
+            }
+            if (usernameInvalid || addressInvalid) {
+                JOptionPane.showMessageDialog(null,
+                        "Invalid Input. \"', \", %, (, ), :\" cannot appear in the fields.",
+                        "Invalid Input",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             // Permission granted. Go to client form.
             if (message.equals("GRANTED")) {
                 Client client = new Client(username, socket);

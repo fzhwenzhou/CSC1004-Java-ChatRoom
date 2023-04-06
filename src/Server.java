@@ -73,6 +73,7 @@ class ThreadServer extends Thread {
         try {
             PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
             Scanner scanner = new Scanner(socket.getInputStream());
+            Thread.sleep(100);
             // Add user to everyone's user list
             users.forEach((user, username) -> {
                 printWriter.println("ADDUSER");
