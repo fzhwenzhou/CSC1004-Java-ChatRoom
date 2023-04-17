@@ -12,10 +12,8 @@
     <list default="true" id="2bfc0d14-9ebd-4fe4-b116-1f614d0fe4a0" name="变更" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/artifacts/ChatRoom_jar/ChatRoom.jar" beforeDir="false" afterPath="$PROJECT_DIR$/out/artifacts/ChatRoom_jar/ChatRoom.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Client.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Client.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Login.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Register.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Register.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Server.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -155,6 +153,10 @@
       <workItem from="1680105209189" duration="61000" />
       <workItem from="1680106138080" duration="285000" />
       <workItem from="1680618666007" duration="2239000" />
+      <workItem from="1680781723188" duration="1708000" />
+      <workItem from="1681380113154" duration="26000" />
+      <workItem from="1681740341862" duration="1620000" />
+      <workItem from="1681741973259" duration="596000" />
     </task>
     <servers />
   </component>

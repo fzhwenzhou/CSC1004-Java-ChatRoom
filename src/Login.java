@@ -41,14 +41,17 @@ public class Login {
             printWriter.flush();
             // Get the message from server after sending username and password
             String message = scanner.nextLine();
-            boolean usernameInvalid = false, addressInvalid = false;
-            for (String s : new String[]{"'", "\"", "%", "(", ")", ":"}) {
-                usernameInvalid = usernameInvalid || username.contains(s);
-                addressInvalid = addressInvalid || address.contains(s);
+            boolean invalid = false;
+            final String[] invalidCharacters = new String[]{"'", "\"", "%", ":"};
+            for (String s : invalidCharacters) {
+                if (username.contains(s) || address.contains(s)) {
+                    invalid = true;
+                    break;
+                }
             }
-            if (usernameInvalid || addressInvalid) {
+            if (invalid) {
                 JOptionPane.showMessageDialog(null,
-                        "Invalid Input. \"', \", %, (, ), :\" cannot appear in the fields.",
+                        "Invalid Input. \"', \", %, :\" cannot appear in the fields.",
                         "Invalid Input",
                         JOptionPane.ERROR_MESSAGE);
                 return;

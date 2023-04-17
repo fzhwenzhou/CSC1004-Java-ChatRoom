@@ -33,6 +33,13 @@ public class Register {
             String gender = genderComboBox.getSelectedItem().toString();
             String address1 = addressTextField1.getText();
             String password1 = "", password2 = "";
+            if (passwordField1.getText().length() < 8) {
+                JOptionPane.showMessageDialog(null,
+                        "Password is too short. Use at least 8 characters.",
+                        "Short Password",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             try {
                 // Get encrypted password
                 password1 = (new BigInteger(1, MessageDigest.getInstance("md5").digest(passwordField1.getText().getBytes()))).toString(16);
@@ -58,14 +65,17 @@ public class Register {
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            boolean usernameInvalid = false, addressInvalid = false;
-            for (String s : new String[]{"'", "\"", "%", "(", ")", ":"}) {
-                usernameInvalid = usernameInvalid || username.contains(s);
-                addressInvalid = addressInvalid || address.contains(s);
+            boolean invalid = false;
+            final String[] invalidCharacters = new String[]{"'", "\"", "%", ":"};
+            for (String s : invalidCharacters) {
+                if (username.contains(s) || address1.contains(s)) {
+                    invalid = true;
+                    break;
+                }
             }
-            if (usernameInvalid || addressInvalid) {
+            if (invalid) {
                 JOptionPane.showMessageDialog(null,
-                        "Invalid Input. \"', \", %, (, ), :\" cannot appear in the fields.",
+                        "Invalid Input. \"', \", %, :\" cannot appear in the fields.",
                         "Invalid Input",
                         JOptionPane.ERROR_MESSAGE);
                 return;
